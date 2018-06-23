@@ -1,18 +1,22 @@
 #!/usr/bin/env python
 
-# from fauxmo import poller, upnp_broadcast_responder, fauxmo, dbg
 from fauxmo import *
 
+import subprocess
 import RPi.GPIO as GPIO
 from time import sleep
-GPIO.setmode(GPIO.BOARD)
-pin = 12
-GPIO.setup(pin, GPIO.OUT)
+import sys 
+
 class LightHandler():
+    def __init__(self):
+        self.pin = 12
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(self.pin, GPIO.OUT)
+
     def light_toggle(self):
-        GPIO.output(pin, 1)
+        GPIO.output(self.pin, 1)
         sleep(0.1)
-        GPIO.output(pin, 0)
+        GPIO.output(self.pin, 0)
 
     def on(self):
         print "Light On"
@@ -26,28 +30,41 @@ class LightHandler():
             sleep(0.1)
         return True
 
-import subprocess
+
+def ir_send(device, key):
+    subprocess.call(["irsend", "SEND_ONCE", device, key])
+
+
 class TVHandler():
     def on(self):
-        subprocess.call(["irsend", "SEND_ONCE", "lg", "KEY_POWER"])
+        ir_send("lg", "KEY_POWER")
         return True
     def off(self):
-        subprocess.call(["irsend", "SEND_ONCE", "lg", "KEY_POWER"])
+        ir_send("lg", "KEY_POWER")
         return True
 
-class BTHandler():
+
+class EdifierSpeakerHandler:
+    def __init__(self, on_key, off_key):
+        self.on_key = on_key
+        self.off_key = off_key
+
     def on(self):
-        subprocess.call(["irsend", "SEND_ONCE", "Edifier", "KEY_Bluetooth"])
-        return True
-    def off(self):
+        try:
+            ir_send("Edifier", self.on_key)
+        except:
+            print sys.exc_info()[0]
+            return False
         return True
 
-class AuxHandler():
-    def on(self):
-        subprocess.call(["irsend", "SEND_ONCE", "Edifier", "KEY_Aux"])
-        return True
     def off(self):
+        try:
+            ir_send("Edifier", self.off_key)
+        except:
+            print sys.exc_info()[0]
+            return False
         return True
+
 
 # Each entry is a list with the following elements:
 #
@@ -62,8 +79,9 @@ class AuxHandler():
 FAUXMOS = [
     ['lg tv', TVHandler(), 46345],
     ['eclipse', LightHandler(), 60407],
-    ['bluetooth speaker', BTHandler(), 50312],
-    ['wired speaker', AuxHandler(), 48532],
+    ['bluetooth speaker', EdifierSpeakerHandler("KEY_BLUETOOTH", "KEY_O"), 50112],
+    ['pc speaker', EdifierSpeakerHandler("KEY_AUX", "KEY_O"), 48532],
+    ['tv speaker', EdifierSpeakerHandler("KEY_O", "KEY_AUX"), 42342],
     ]
 
 DEBUG=True
@@ -86,7 +104,7 @@ for one_faux in FAUXMOS:
         one_faux.append(0)
     switch = fauxmo(one_faux[0], u, p, None, one_faux[2], action_handler = one_faux[1])
 
-dbg("Entering main loop\n")
+print("Entering main loop\n")
 
 while True:
     try:
