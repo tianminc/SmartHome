@@ -8,6 +8,7 @@ a Raspberry Pi Zero W running Raspbian. I also have a PC connected to the TV and
 ## Code Used and Dependencies
 * [fauxmo](https://github.com/makermusings/fauxmo) for emulating Belkin WeMo devices with Alexa
 * [LIRC](http://www.lirc.org/) for recording IR remote and sending emualted IR remote signals.
+* [lgtv2](https://github.com/hobbyquaker/lgtv2) for getting volume change events from TV to change speaker volume.
 
 ## Components
 * Raspberry Pi Zero W. Heart of the project. It is connected to two hardware devices: an IR
@@ -18,7 +19,8 @@ a Raspberry Pi Zero W running Raspbian. I also have a PC connected to the TV and
   When the fauxmo switch is turned on/off, Raspberry Pi sends the IR signal to TV.
 * Edifier S2000Pro speakers. Connected to TV via optical and to PC with aux input. It comes with
   an IR remote control to control power, volume, EQ modes and input selection. IR LED on Raspberry
-  Pi emulates this remote to control the speaker.
+  Pi emulates this remote to control the speaker. The volume can be controlled by TV remote using
+  `lg_volume.js`.
 * [Eclipse floor lamp](https://www.amazon.com/gp/product/B01KKZRF5C). I like how it looks but
   out of box it's not Alexa friendly. It does not turn itself on when plugged into power and
   requires a touch on its capacitance switch to turn on or dim. This makes it impossible to
